@@ -1,36 +1,23 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
-import os
 import ezdxf
 
-def calculate_bounding_box(file_path):
-    try:
-        doc = ezdxf.readfile(file_path)
-        modelspace = doc.modelspace()
-        bounding_box = modelspace.boundary()
-        return bounding_box
-    except ezdxf.DXFError as e:
-        st.error("Error reading DXF file: " + str(e))
-        return None
+def calculate_bounding_box(file):
+    dxf = ezdxf.read(file)
+    modelspace = dxf.modelspace()
+    bbox = modelspace.bbox()
+    return {
+        'min_point': (bbox.min.x, bbox.min.y),
+        'max_point': (bbox.max.x, bbox.max.y)
+    }
 
 def main():
-    st.title("DXF Bounding Box")
-    uploaded_file = st.file_uploader("Upload DXF file", type=["dxf"])
+    st.title('DXF File Upload')
+    uploaded_file = st.file_uploader('Upload a DXF file', type=['dxf'])
+    if uploaded_file:
+        bounding_box = calculate_bounding_box(uploaded_file)
+        st.header('Bounding Box')
+        st.write('Min Point:', bounding_box['min_point'])
+        st.write('Max Point:', bounding_box['max_point'])
 
-    if uploaded_file is not None:
-        file_path = os.path.join("uploads", uploaded_file.name)
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-        st.success("File uploaded successfully.")
-
-        bounding_box = calculate_bounding_box(file_path)
-        if bounding_box:
-            st.header("Bounding Box")
-            st.write("Min point:", bounding_box.min)
-            st.write("Max point:", bounding_box.max)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
