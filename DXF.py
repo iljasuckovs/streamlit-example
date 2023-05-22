@@ -1,6 +1,7 @@
 import streamlit as st
 import ezdxf
 
+
 def calculate_bounding_box(file):
     dxf = ezdxf.read(file)
     modelspace = dxf.modelspace()
